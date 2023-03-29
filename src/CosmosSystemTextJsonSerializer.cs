@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Azure.Core.Serialization;
 using Microsoft.Azure.Cosmos;
+using Microsoft.IO;
 using Soenneker.Extensions.Stream;
 using Soenneker.Json.OptionsCollection;
 using Soenneker.Utils.MemoryStream.Abstract;
@@ -8,7 +9,8 @@ using Soenneker.Utils.MemoryStream.Abstract;
 namespace Soenneker.Cosmos.Serializer;
 
 /// <summary>
-/// Uses <see cref="JsonObjectSerializer"/> which leverages Systems.Text.Json providing a simple API to interact with on the Azure SDKs.
+/// A fast, lightweight JSON (de)serializer for Azure Cosmos DB <para/>
+/// This serializer leverages Systems.Text.Json, overriding the default Json.Net serializer. It also uses <see cref="RecyclableMemoryStream"/> (via <see cref="IMemoryStreamUtil"/>) for further memory improvements.
 /// </summary>
 public class CosmosSystemTextJsonSerializer : CosmosSerializer
 {
