@@ -5,6 +5,8 @@
 # ![](https://user-images.githubusercontent.com/4441470/224455560-91ed3ee7-f510-4041-a8d2-3fc093025112.png) Soenneker.Cosmos.Serializer
 ### A fast, lightweight JSON (de)serializer for Azure Cosmos DB
 
+This serializer leverages `Systems.Text.Json`, overriding the default Json.Net serializer. It also uses `RecyclableMemoryStream` for further memory improvements.
+
 ## Installation
 
 ```
