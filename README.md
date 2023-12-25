@@ -10,7 +10,7 @@ This serializer leverages `Systems.Text.Json`, overriding the default Json.Net s
 ## Installation
 
 ```
-Install-Package Soenneker.Cosmos.Serializer
+dotnet add package Soenneker.Cosmos.Serializer
 ```
 
 ## Usage
