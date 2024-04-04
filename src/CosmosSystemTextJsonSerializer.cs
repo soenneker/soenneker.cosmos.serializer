@@ -2,7 +2,7 @@
 using System.IO;
 using Azure.Core.Serialization;
 using Microsoft.Azure.Cosmos;
-using Microsoft.IO;
+using Soenneker.Cosmos.Serializer.Abstract;
 using Soenneker.Extensions.Stream;
 using Soenneker.Json.OptionsCollection;
 using Soenneker.Reflection.Cache;
@@ -11,27 +11,35 @@ using Soenneker.Utils.MemoryStream.Abstract;
 
 namespace Soenneker.Cosmos.Serializer;
 
-/// <summary>
-/// A fast, lightweight JSON (de)serializer for Azure Cosmos DB <para/>
-/// This serializer leverages Systems.Text.Json, overriding the default Json.Net serializer. It also uses <see cref="RecyclableMemoryStream"/> (via <see cref="IMemoryStreamUtil"/>) for further memory improvements.
-/// </summary>
-public class CosmosSystemTextJsonSerializer : CosmosSerializer
+///<inheritdoc cref="ICosmosSystemTextJsonSerializer"/>
+public class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSystemTextJsonSerializer
 {
     private readonly JsonObjectSerializer _systemTextJsonSerializer;
     private readonly IMemoryStreamUtil _memoryStreamUtil;
 
+    private readonly bool _cachingEnabled;
+
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-    private readonly ReflectionCache _reflectionCache;
+    private readonly ReflectionCache? _reflectionCache;
+    private readonly CachedType? _cachedStreamType;
+    private readonly Type? _streamType;
 
-    private readonly CachedType _cachedStreamType;
-
-    public CosmosSystemTextJsonSerializer(IMemoryStreamUtil memoryStreamUtil)
+    public CosmosSystemTextJsonSerializer(IMemoryStreamUtil memoryStreamUtil, bool cachingEnabled = true)
     {
         _systemTextJsonSerializer = new JsonObjectSerializer(JsonOptionsCollection.WebOptions); // TODO: get more strict for performance
         _memoryStreamUtil = memoryStreamUtil;
-        _reflectionCache = new ReflectionCache();
 
-        _cachedStreamType = _reflectionCache.GetCachedType(typeof(Stream));
+        _cachingEnabled = cachingEnabled;
+
+        if (_cachingEnabled)
+        {
+            _reflectionCache = new ReflectionCache();
+            _cachedStreamType = _reflectionCache.GetCachedType(typeof(Stream));
+        }
+        else
+        {
+            _streamType = typeof(Stream);
+        }
     }
 
     public override T FromStream<T>(Stream stream)
@@ -45,9 +53,19 @@ public class CosmosSystemTextJsonSerializer : CosmosSerializer
 
             Type typeOfT = typeof(T);
 
-            if (_cachedStreamType.IsAssignableFrom(typeOfT))
+            if (_cachingEnabled)
             {
-                return (T) (object) stream;
+                if (_cachedStreamType!.IsAssignableFrom(typeOfT))
+                {
+                    return (T)(object)stream;
+                }
+            }
+            else
+            {
+                if (_streamType!.IsAssignableFrom(typeOfT))
+                {
+                    return (T)(object)stream;
+                }
             }
 
             return (T) _systemTextJsonSerializer.Deserialize(stream, typeOfT, default)!; // TODO: cancellationToken
