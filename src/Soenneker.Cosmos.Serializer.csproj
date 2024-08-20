@@ -37,7 +37,7 @@
         <None Include="..\LICENSE" Pack="true" PackagePath="\" />
         <None Include="..\icon.png" Pack="true" PackagePath="\" />
 
-        <PackageReference Include="Soenneker.Extensions.Stream" Version="2.1.37" />
+        <PackageReference Include="Soenneker.Extensions.Stream" Version="2.1.38" />
         <PackageReference Include="Soenneker.Json.OptionsCollection" Version="2.1.497" />
         <PackageReference Include="Soenneker.Reflection.Cache" Version="2.1.163" />
         <PackageReference Include="Soenneker.Utils.MemoryStream" Version="2.1.624" />
