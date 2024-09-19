@@ -41,6 +41,6 @@
         <PackageReference Include="Soenneker.Json.OptionsCollection" Version="2.1.572" />
         <PackageReference Include="Soenneker.Reflection.Cache" Version="2.1.195" />
         <PackageReference Include="Soenneker.Utils.MemoryStream" Version="2.1.710" />
-        <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.43.0" />
+        <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.43.1" />
     </ItemGroup>
 </Project>
