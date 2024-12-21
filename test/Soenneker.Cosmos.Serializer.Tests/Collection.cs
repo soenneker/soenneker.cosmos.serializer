@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 
 namespace Soenneker.Cosmos.Serializer.Tests;
 

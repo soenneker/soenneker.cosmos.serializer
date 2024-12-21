@@ -1,7 +1,5 @@
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using Soenneker.Fixtures.Unit;
 using Soenneker.Utils.Test;
@@ -21,12 +19,10 @@ public class Fixture : UnitFixture
     {
         services.AddLogging(builder =>
         {
-            builder.ClearProviders();
             builder.AddSerilog(dispose: true);
         });
 
         IConfiguration config = TestUtil.BuildConfig();
         services.AddSingleton(config);
-
     }
 }
