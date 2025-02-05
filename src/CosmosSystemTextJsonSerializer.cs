@@ -46,7 +46,7 @@ public class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSystemTex
     {
         using (stream)
         {
-            if (stream.CanSeek && stream.Length == 0)
+            if (stream is {CanSeek: true, Length: 0})
             {
                 return default!;
             }
