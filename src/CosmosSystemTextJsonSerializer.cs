@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using Azure.Core.Serialization;
 using Microsoft.Azure.Cosmos;
 using Soenneker.Cosmos.Serializer.Abstract;
@@ -68,14 +69,14 @@ public class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSystemTex
                 }
             }
 
-            return (T) _systemTextJsonSerializer.Deserialize(stream, typeOfT, default)!; // TODO: cancellationToken
+            return (T) _systemTextJsonSerializer.Deserialize(stream, typeOfT, CancellationToken.None)!; // TODO: cancellationToken
         }
     }
 
     public override Stream ToStream<T>(T input)
     {
         MemoryStream streamPayload = _memoryStreamUtil.GetSync();
-        _systemTextJsonSerializer.Serialize(streamPayload, input, typeof(T), default); // TODO: cancellationToken
+        _systemTextJsonSerializer.Serialize(streamPayload, input, typeof(T), CancellationToken.None); // TODO: cancellationToken
         streamPayload.ToStart(); // Seek because Position set directly will lose the buffer: https://stackoverflow.com/a/71596118
         return streamPayload;
     }
