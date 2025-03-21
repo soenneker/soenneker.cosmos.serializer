@@ -36,7 +36,7 @@
         <None Include="..\README.md" Pack="true" PackagePath="\" />
         <None Include="..\LICENSE" Pack="true" PackagePath="\" />
         <None Include="..\icon.png" Pack="true" PackagePath="\" />
-        <PackageReference Include="Soenneker.Json.OptionsCollection" Version="3.0.1141" />
+        <PackageReference Include="Soenneker.Json.OptionsCollection" Version="3.0.1142" />
         <PackageReference Include="Soenneker.Reflection.Cache" Version="3.0.485" />
         <PackageReference Include="Soenneker.Utils.MemoryStream" Version="3.0.1179" />
         <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.47.2" />
