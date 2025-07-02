@@ -13,7 +13,7 @@ using Soenneker.Utils.MemoryStream.Abstract;
 namespace Soenneker.Cosmos.Serializer;
 
 ///<inheritdoc cref="ICosmosSystemTextJsonSerializer"/>
-public class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSystemTextJsonSerializer
+public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSystemTextJsonSerializer
 {
     private readonly JsonObjectSerializer _systemTextJsonSerializer;
     private readonly IMemoryStreamUtil _memoryStreamUtil;
