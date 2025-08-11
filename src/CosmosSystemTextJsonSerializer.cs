@@ -1,83 +1,56 @@
-﻿using System;
-using System.IO;
-using System.Threading;
-using Azure.Core.Serialization;
+﻿using Azure.Core.Serialization;
 using Microsoft.Azure.Cosmos;
 using Soenneker.Cosmos.Serializer.Abstract;
 using Soenneker.Extensions.Stream;
 using Soenneker.Json.OptionsCollection;
-using Soenneker.Reflection.Cache;
-using Soenneker.Reflection.Cache.Types;
 using Soenneker.Utils.MemoryStream.Abstract;
+using System;
+using System.IO;
+using System.Threading;
 
 namespace Soenneker.Cosmos.Serializer;
 
 ///<inheritdoc cref="ICosmosSystemTextJsonSerializer"/>
 public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSystemTextJsonSerializer
 {
-    private readonly JsonObjectSerializer _systemTextJsonSerializer;
+    private static readonly JsonObjectSerializer _serializer = new(JsonOptionsCollection.WebOptions);
+    private static readonly Type _streamType = typeof(Stream);
+
     private readonly IMemoryStreamUtil _memoryStreamUtil;
 
-    private readonly bool _cachingEnabled;
-
-    // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-    private readonly ReflectionCache? _reflectionCache;
-    private readonly CachedType? _cachedStreamType;
-    private readonly Type? _streamType;
-
-    public CosmosSystemTextJsonSerializer(IMemoryStreamUtil memoryStreamUtil, bool cachingEnabled = true)
+    public CosmosSystemTextJsonSerializer(IMemoryStreamUtil memoryStreamUtil)
     {
-        _systemTextJsonSerializer = new JsonObjectSerializer(JsonOptionsCollection.WebOptions); // TODO: get more strict for performance
         _memoryStreamUtil = memoryStreamUtil;
-
-        _cachingEnabled = cachingEnabled;
-
-        if (_cachingEnabled)
-        {
-            _reflectionCache = new ReflectionCache();
-            _cachedStreamType = _reflectionCache.GetCachedType(typeof(Stream));
-        }
-        else
-        {
-            _streamType = typeof(Stream);
-        }
     }
 
     public override T FromStream<T>(Stream stream)
     {
-        using (stream)
+        // If caller requested the raw stream, hand it off and DO NOT dispose it here.
+        if (_streamType.IsAssignableFrom(typeof(T)))
+            return (T)(object)stream;
+
+        // Empty-body fast path (safe only if seekable)
+        if (stream is {CanSeek: true, Length: 0})
         {
-            if (stream is {CanSeek: true, Length: 0})
-            {
-                return default!;
-            }
+            stream.Dispose();
+            return default!;
+        }
 
-            Type typeOfT = typeof(T);
-
-            if (_cachingEnabled)
-            {
-                if (_cachedStreamType!.IsAssignableFrom(typeOfT))
-                {
-                    return (T)(object)stream;
-                }
-            }
-            else
-            {
-                if (_streamType!.IsAssignableFrom(typeOfT))
-                {
-                    return (T)(object)stream;
-                }
-            }
-
-            return (T) _systemTextJsonSerializer.Deserialize(stream, typeOfT, CancellationToken.None)!; // TODO: cancellationToken
+        try
+        {
+            return (T)_serializer.Deserialize(stream, typeof(T), CancellationToken.None)!;
+        }
+        finally
+        {
+            stream.Dispose();
         }
     }
 
     public override Stream ToStream<T>(T input)
     {
-        MemoryStream streamPayload = _memoryStreamUtil.GetSync();
-        _systemTextJsonSerializer.Serialize(streamPayload, input, typeof(T), CancellationToken.None); // TODO: cancellationToken
-        streamPayload.ToStart(); // Seek because Position set directly will lose the buffer: https://stackoverflow.com/a/71596118
-        return streamPayload;
+        MemoryStream ms = _memoryStreamUtil.GetSync();
+        _serializer.Serialize(ms, input, typeof(T), CancellationToken.None);
+        ms.ToStart();
+        return ms;
     }
 }
