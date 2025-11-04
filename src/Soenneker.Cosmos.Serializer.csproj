@@ -40,6 +40,6 @@
         <PackageReference Include="Soenneker.Extensions.Stream" Version="4.0.93" />
         <PackageReference Include="Soenneker.Json.OptionsCollection" Version="4.0.1216" />
         <PackageReference Include="Soenneker.Utils.MemoryStream" Version="4.0.1291" />
-        <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.54.0" />
+        <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.54.1" />
     </ItemGroup>
 </Project>
