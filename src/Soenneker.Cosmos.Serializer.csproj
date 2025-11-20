@@ -38,7 +38,7 @@
         <None Include="..\icon.png" Pack="true" PackagePath="\" />
         
         <PackageReference Include="Soenneker.Extensions.Stream" Version="4.0.94" />
-        <PackageReference Include="Soenneker.Json.OptionsCollection" Version="4.0.1217" />
+        <PackageReference Include="Soenneker.Json.OptionsCollection" Version="4.0.1218" />
         <PackageReference Include="Soenneker.Utils.MemoryStream" Version="4.0.1298" />
         <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.55.0" />
     </ItemGroup>
