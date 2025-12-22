@@ -25,24 +25,18 @@ public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSy
 
     public override T FromStream<T>(Stream stream)
     {
-        // If caller requested the raw stream, hand it off and DO NOT dispose it here.
-        if (_streamType.IsAssignableFrom(typeof(T)))
+        if (typeof(T) == _streamType)
             return (T)(object)stream;
 
-        // Empty-body fast path (safe only if seekable)
-        if (stream is {CanSeek: true, Length: 0})
+        if (stream is MemoryStream { Length: 0 })
         {
             stream.Dispose();
             return default!;
         }
 
-        try
+        using (stream)
         {
             return (T)_serializer.Deserialize(stream, typeof(T), CancellationToken.None)!;
-        }
-        finally
-        {
-            stream.Dispose();
         }
     }
 
