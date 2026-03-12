@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Soenneker.Cosmos.Serializer.csproj" />
+        <ProjectReference Include="..\..\src\Soenneker.Cosmos.Serializer\Soenneker.Cosmos.Serializer.csproj" />
     </ItemGroup>
 
     <ItemGroup>
