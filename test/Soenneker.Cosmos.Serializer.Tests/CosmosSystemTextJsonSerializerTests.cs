@@ -1,18 +1,16 @@
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
-
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Cosmos.Serializer.Tests;
 
-[Collection("Collection")]
-public class CosmosSystemTextJsonSerializerTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public class CosmosSystemTextJsonSerializerTests : HostedUnitTest
 {
-    public CosmosSystemTextJsonSerializerTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public CosmosSystemTextJsonSerializerTests(Host host) : base(host)
     {
 
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
