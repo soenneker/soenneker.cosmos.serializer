@@ -23,6 +23,12 @@ public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSy
         _memoryStreamUtil = memoryStreamUtil;
     }
 
+    /// <summary>
+    /// Executes the from stream operation.
+    /// </summary>
+    /// <typeparam name="T">The T type.</typeparam>
+    /// <param name="stream">The stream.</param>
+    /// <returns>The result of the operation.</returns>
     public override T FromStream<T>(Stream stream)
     {
         if (typeof(T) == _streamType)
@@ -40,6 +46,12 @@ public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSy
         }
     }
 
+    /// <summary>
+    /// Executes the to stream operation.
+    /// </summary>
+    /// <typeparam name="T">The T type.</typeparam>
+    /// <param name="input">The input.</param>
+    /// <returns>The result of the operation.</returns>
     public override Stream ToStream<T>(T input)
     {
         MemoryStream ms = _memoryStreamUtil.GetSync();
