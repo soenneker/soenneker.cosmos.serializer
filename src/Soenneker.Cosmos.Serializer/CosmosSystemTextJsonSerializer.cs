@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace Soenneker.Cosmos.Serializer;
 
-///<inheritdoc cref="ICosmosSystemTextJsonSerializer"/>
+/// <inheritdoc cref="ICosmosSystemTextJsonSerializer"/>
 public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSystemTextJsonSerializer
 {
     private static readonly JsonObjectSerializer _serializer = new(JsonOptionsCollection.WebOptions);
