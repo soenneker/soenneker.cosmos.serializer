@@ -10,7 +10,6 @@ using System.Threading;
 
 namespace Soenneker.Cosmos.Serializer;
 
-/// <inheritdoc cref="ICosmosSystemTextJsonSerializer"/>
 public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSystemTextJsonSerializer
 {
     private static readonly JsonObjectSerializer _serializer = new(JsonOptionsCollection.WebOptions);
@@ -55,8 +54,17 @@ public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSy
     public override Stream ToStream<T>(T input)
     {
         MemoryStream ms = _memoryStreamUtil.GetSync();
-        _serializer.Serialize(ms, input, typeof(T), CancellationToken.None);
-        ms.ToStart();
-        return ms;
+
+        try
+        {
+            _serializer.Serialize(ms, input, typeof(T), CancellationToken.None);
+            ms.ToStart();
+            return ms;
+        }
+        catch
+        {
+            ms.Dispose();
+            throw;
+        }
     }
 }
