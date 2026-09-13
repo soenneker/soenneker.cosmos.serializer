@@ -1,19 +1,16 @@
-﻿using Azure.Core.Serialization;
-using Microsoft.Azure.Cosmos;
+﻿using Microsoft.Azure.Cosmos;
 using Soenneker.Cosmos.Serializer.Abstract;
-using Soenneker.Extensions.Stream;
 using Soenneker.Json.OptionsCollection;
 using Soenneker.Utils.MemoryStream.Abstract;
 using System;
 using System.IO;
-using System.Threading;
+using System.Text.Json;
 
 namespace Soenneker.Cosmos.Serializer;
 
-/// <inheritdoc cref="ICosmosSystemTextJsonSerializer" />
 public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSystemTextJsonSerializer
 {
-    private static readonly JsonObjectSerializer _serializer = new(JsonOptionsCollection.WebOptions);
+    private static readonly JsonSerializerOptions _options = JsonOptionsCollection.WebOptions;
     private static readonly Type _streamType = typeof(Stream);
 
     private readonly IMemoryStreamUtil _memoryStreamUtil;
@@ -23,12 +20,6 @@ public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSy
         _memoryStreamUtil = memoryStreamUtil;
     }
 
-    /// <summary>
-    /// Executes the from stream operation.
-    /// </summary>
-    /// <typeparam name="T">The T type.</typeparam>
-    /// <param name="stream">The stream.</param>
-    /// <returns>The result of the operation.</returns>
     public override T FromStream<T>(Stream stream)
     {
         if (typeof(T) == _streamType)
@@ -42,24 +33,46 @@ public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSy
 
         using (stream)
         {
-            return (T)_serializer.Deserialize(stream, typeof(T), CancellationToken.None)!;
+            // Only bypass Read for the concrete BCL stream; subclasses may transform reads.
+            if (stream.GetType() == typeof(MemoryStream))
+            {
+                var memory = (MemoryStream)stream;
+                long remaining = memory.Length - memory.Position;
+                if (remaining >= 0)
+                {
+                    if (memory.TryGetBuffer(out ArraySegment<byte> buffer))
+                        return DeserializeBuffer<T>(buffer.AsSpan((int)memory.Position));
+
+                    // Small opaque buffers can use the stack instead of the JSON stream reader's pooled buffer.
+                    if (remaining <= 1024)
+                    {
+                        Span<byte> bufferCopy = stackalloc byte[(int)remaining];
+                        memory.ReadExactly(bufferCopy);
+                        return DeserializeBuffer<T>(bufferCopy);
+                    }
+                }
+            }
+
+            return JsonSerializer.Deserialize<T>(stream, _options)!;
         }
     }
 
-    /// <summary>
-    /// Executes the to stream operation.
-    /// </summary>
-    /// <typeparam name="T">The T type.</typeparam>
-    /// <param name="input">The input.</param>
-    /// <returns>The result of the operation.</returns>
+    private static T DeserializeBuffer<T>(ReadOnlySpan<byte> json)
+    {
+        // Stream deserialization accepts a UTF-8 BOM.
+        if (json.StartsWith("\uFEFF"u8))
+            json = json[3..];
+        return JsonSerializer.Deserialize<T>(json, _options)!;
+    }
+
     public override Stream ToStream<T>(T input)
     {
         MemoryStream ms = _memoryStreamUtil.GetSync();
 
         try
         {
-            _serializer.Serialize(ms, input, typeof(T), CancellationToken.None);
-            ms.ToStart();
+            JsonSerializer.Serialize(ms, input, _options);
+            ms.Position = 0;
             return ms;
         }
         catch
