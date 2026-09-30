@@ -40,7 +40,7 @@ var client = new CosmosClient(
 
 ## JSON behavior
 
-Serialization uses `Soenneker.Json.OptionsCollection.JsonOptionsCollection.WebOptions`. The same options are used for reads and writes, keeping property naming and configured converters consistent. This replaces the Cosmos SDK's default Newtonsoft.Json serializer, so verify stored JSON compatibility before switching an existing container.
+Serialization uses `Soenneker.Json.OptionsCollection.JsonOptionsCollection.WebOptions`. The same options are used for reads and writes, keeping property naming and configured converters consistent. This replaces the Cosmos SDK's default serializer, so verify stored JSON compatibility before switching an existing container.
 
 ## Stream ownership
 
