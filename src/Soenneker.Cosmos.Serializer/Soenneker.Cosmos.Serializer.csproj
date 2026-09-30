@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <AzureCosmosDisableNewtonsoftJsonCheck>true</AzureCosmosDisableNewtonsoftJsonCheck>
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <Platforms>AnyCPU</Platforms>
@@ -43,5 +42,6 @@
         <PackageReference Include="Soenneker.Json.OptionsCollection" Version="4.0.1293" />
         <PackageReference Include="Soenneker.Utils.MemoryStream" Version="4.0.1569" />
         <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.63.2" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     </ItemGroup>
 </Project>
