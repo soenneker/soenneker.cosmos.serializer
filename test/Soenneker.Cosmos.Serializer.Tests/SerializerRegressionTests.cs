@@ -15,7 +15,7 @@ public class SerializerRegressionTests
     [Arguments(true, true)]
     [Arguments(false, false)]
     [Arguments(false, true)]
-    public async Task ReadsRemainingBufferWithOriginAndOptionalBom(bool exposed, bool bom)
+    public async ValueTask ReadsRemainingBufferWithOriginAndOptionalBom(bool exposed, bool bom)
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
@@ -27,7 +27,7 @@ public class SerializerRegressionTests
     }
 
     [Test]
-    public async Task PreservesStreamOwnershipAndEmptyResponse()
+    public async ValueTask PreservesStreamOwnershipAndEmptyResponse()
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
@@ -40,7 +40,7 @@ public class SerializerRegressionTests
     }
 
     [Test]
-    public async Task DisposesMalformedInputAndFailedOutput()
+    public async ValueTask DisposesMalformedInputAndFailedOutput()
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
@@ -57,7 +57,7 @@ public class SerializerRegressionTests
     }
 
     [Test]
-    public async Task RoundTripsValueTypesAndRuntimeObjectTypes()
+    public async ValueTask RoundTripsValueTypesAndRuntimeObjectTypes()
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
@@ -67,7 +67,7 @@ public class SerializerRegressionTests
     }
 
     [Test]
-    public async Task ReadsNonSeekableStreamAndHonorsSubclassReads()
+    public async ValueTask ReadsNonSeekableStreamAndHonorsSubclassReads()
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
