@@ -4,11 +4,13 @@ using Soenneker.Json.OptionsCollection;
 using Soenneker.Utils.MemoryStream.Abstract;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Soenneker.Cosmos.Serializer;
 
-public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSystemTextJsonSerializer
+public sealed class CosmosSystemTextJsonSerializer : CosmosLinqSerializer, ICosmosSystemTextJsonSerializer
 {
     private static readonly JsonSerializerOptions _options = JsonOptionsCollection.WebOptions;
     private static readonly Type _streamType = typeof(Stream);
@@ -18,6 +20,20 @@ public sealed class CosmosSystemTextJsonSerializer : CosmosSerializer, ICosmosSy
     public CosmosSystemTextJsonSerializer(IMemoryStreamUtil memoryStreamUtil)
     {
         _memoryStreamUtil = memoryStreamUtil;
+    }
+
+    public override string SerializeMemberName(MemberInfo memberInfo)
+    {
+        ArgumentNullException.ThrowIfNull(memberInfo);
+        // Extension data is flattened into the containing JSON object by STJ and the Cosmos LINQ translator.
+        if (memberInfo.GetCustomAttribute<JsonExtensionDataAttribute>(inherit: true) != null)
+            return null!;
+
+        JsonPropertyNameAttribute? explicitName = memberInfo.GetCustomAttribute<JsonPropertyNameAttribute>(inherit: true);
+        if (explicitName != null)
+            return explicitName.Name;
+
+        return _options.PropertyNamingPolicy?.ConvertName(memberInfo.Name) ?? memberInfo.Name;
     }
 
     public override T FromStream<T>(Stream stream)
