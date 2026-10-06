@@ -1,4 +1,6 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization.Metadata;
+using Microsoft.Azure.Cosmos;
 using Soenneker.Cosmos.Serializer.Abstract;
 using Soenneker.Json.OptionsCollection;
 using Soenneker.Utils.MemoryStream.Abstract;
@@ -12,15 +14,27 @@ namespace Soenneker.Cosmos.Serializer;
 
 public sealed class CosmosSystemTextJsonSerializer : CosmosLinqSerializer, ICosmosSystemTextJsonSerializer
 {
-    private static readonly JsonSerializerOptions _options = JsonOptionsCollection.WebOptions;
+    private readonly JsonSerializerOptions _options;
     private static readonly Type _streamType = typeof(Stream);
 
     private readonly IMemoryStreamUtil _memoryStreamUtil;
 
+    [RequiresUnreferencedCode("The legacy serializer uses reflection. Supply a generated JsonSerializerContext instead.")]
+    [RequiresDynamicCode("The legacy serializer may require runtime code generation. Supply a generated JsonSerializerContext instead.")]
     public CosmosSystemTextJsonSerializer(IMemoryStreamUtil memoryStreamUtil)
     {
+        _options = JsonOptionsCollection.WebOptions;
         _memoryStreamUtil = memoryStreamUtil;
     }
+
+    public CosmosSystemTextJsonSerializer(IMemoryStreamUtil memoryStreamUtil, JsonSerializerContext jsonContext)
+    {
+        ArgumentNullException.ThrowIfNull(jsonContext);
+        _options = jsonContext.Options;
+        _memoryStreamUtil = memoryStreamUtil;
+    }
+
+    private JsonTypeInfo<T> Contract<T>() => (JsonTypeInfo<T>)_options.GetTypeInfo(typeof(T));
 
     public override string SerializeMemberName(MemberInfo memberInfo)
     {
@@ -69,16 +83,16 @@ public sealed class CosmosSystemTextJsonSerializer : CosmosLinqSerializer, ICosm
                 }
             }
 
-            return JsonSerializer.Deserialize<T>(stream, _options)!;
+            return JsonSerializer.Deserialize(stream, Contract<T>())!;
         }
     }
 
-    private static T DeserializeBuffer<T>(ReadOnlySpan<byte> json)
+    private T DeserializeBuffer<T>(ReadOnlySpan<byte> json)
     {
         // Stream deserialization accepts a UTF-8 BOM.
         if (json.StartsWith("\uFEFF"u8))
             json = json[3..];
-        return JsonSerializer.Deserialize<T>(json, _options)!;
+        return JsonSerializer.Deserialize(json, Contract<T>())!;
     }
 
     public override Stream ToStream<T>(T input)
@@ -87,7 +101,7 @@ public sealed class CosmosSystemTextJsonSerializer : CosmosLinqSerializer, ICosm
 
         try
         {
-            JsonSerializer.Serialize(ms, input, _options);
+            JsonSerializer.Serialize(ms, input, Contract<T>());
             ms.Position = 0;
             return ms;
         }
