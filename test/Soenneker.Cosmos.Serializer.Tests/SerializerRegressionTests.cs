@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using AwesomeAssertions;
 using Soenneker.Utils.MemoryStream;
+using System.Threading;
 
 namespace Soenneker.Cosmos.Serializer.Tests;
 
@@ -15,7 +16,7 @@ public class SerializerRegressionTests
     [Arguments(true, true)]
     [Arguments(false, false)]
     [Arguments(false, true)]
-    public async Task ReadsRemainingBufferWithOriginAndOptionalBom(bool exposed, bool bom)
+    public async Task ReadsRemainingBufferWithOriginAndOptionalBom(bool exposed, bool bom, CancellationToken cancellationToken)
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
@@ -27,7 +28,7 @@ public class SerializerRegressionTests
     }
 
     [Test]
-    public async Task PreservesStreamOwnershipAndEmptyResponse()
+    public async Task PreservesStreamOwnershipAndEmptyResponse(CancellationToken cancellationToken)
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
@@ -40,7 +41,7 @@ public class SerializerRegressionTests
     }
 
     [Test]
-    public async Task DisposesMalformedInputAndFailedOutput()
+    public async Task DisposesMalformedInputAndFailedOutput(CancellationToken cancellationToken)
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
@@ -50,14 +51,14 @@ public class SerializerRegressionTests
         Action read = () => serializer.FromStream<Payload>(stream);
         read.Should().Throw<JsonException>();
         stream.CanRead.Should().BeFalse();
-        long inUse = util.GetManagerSync().SmallPoolInUseSize;
+        long inUse = util.GetManagerSync(cancellationToken: cancellationToken).SmallPoolInUseSize;
         Action write = () => serializer.ToStream(new FailingPayload());
         write.Should().Throw<InvalidOperationException>();
-        util.GetManagerSync().SmallPoolInUseSize.Should().Be(inUse);
+        util.GetManagerSync(cancellationToken: cancellationToken).SmallPoolInUseSize.Should().Be(inUse);
     }
 
     [Test]
-    public async Task RoundTripsValueTypesAndRuntimeObjectTypes()
+    public async Task RoundTripsValueTypesAndRuntimeObjectTypes(CancellationToken cancellationToken)
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
@@ -67,7 +68,7 @@ public class SerializerRegressionTests
     }
 
     [Test]
-    public async Task ReadsNonSeekableStreamAndHonorsSubclassReads()
+    public async Task ReadsNonSeekableStreamAndHonorsSubclassReads(CancellationToken cancellationToken)
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);

@@ -6,13 +6,14 @@ using AwesomeAssertions;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Soenneker.Utils.MemoryStream;
+using System.Threading;
 
 namespace Soenneker.Cosmos.Serializer.Tests;
 
 public sealed class LinqSerializerTests
 {
     [Test]
-    public async Task Member_names_follow_the_same_STJ_contract_as_document_storage()
+    public async Task Member_names_follow_the_same_STJ_contract_as_document_storage(CancellationToken cancellationToken)
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
@@ -26,7 +27,7 @@ public sealed class LinqSerializerTests
     }
 
     [Test]
-    public async Task Adding_LINQ_support_preserves_existing_document_JSON_and_round_trip()
+    public async Task Adding_LINQ_support_preserves_existing_document_JSON_and_round_trip(CancellationToken cancellationToken)
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
@@ -55,7 +56,7 @@ public sealed class LinqSerializerTests
     }
 
     [Test]
-    public async Task Offline_SDK_queries_use_camel_case_aliases_nested_and_inherited_names()
+    public async Task Offline_SDK_queries_use_camel_case_aliases_nested_and_inherited_names(CancellationToken cancellationToken)
     {
         await using var util = new MemoryStreamUtil();
         using var handler = new BlockingSerializerHttpHandler();
@@ -76,7 +77,7 @@ public sealed class LinqSerializerTests
     }
 
     [Test]
-    public async Task Offline_SDK_scalar_enum_and_date_literals_match_stored_STJ_values()
+    public async Task Offline_SDK_scalar_enum_and_date_literals_match_stored_STJ_values(CancellationToken cancellationToken)
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
@@ -101,7 +102,7 @@ public sealed class LinqSerializerTests
     }
 
     [Test]
-    public async Task Explicitly_included_field_alias_matches_storage_and_SQL_with_other_fields_excluded()
+    public async Task Explicitly_included_field_alias_matches_storage_and_SQL_with_other_fields_excluded(CancellationToken cancellationToken)
     {
         await using var util = new MemoryStreamUtil();
         var serializer = new CosmosSystemTextJsonSerializer(util);
@@ -129,7 +130,7 @@ public sealed class LinqSerializerTests
     }
 
     [Test]
-    public async Task Offline_SDK_flattens_extension_data_member_paths()
+    public async Task Offline_SDK_flattens_extension_data_member_paths(CancellationToken cancellationToken)
     {
         await using var util = new MemoryStreamUtil();
         using var handler = new BlockingSerializerHttpHandler();
